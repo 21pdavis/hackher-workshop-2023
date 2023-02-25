@@ -1,11 +1,12 @@
 use std::env;
 
 use colored::Colorize;
+use sdl2::Sdl;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
-use sdl2::Sdl;
+use sdl2::rect::Rect;
 use std::time::Duration;
 
 fn init_canvas(context: &Sdl) -> Canvas<sdl2::video::Window> {
@@ -19,7 +20,10 @@ fn init_canvas(context: &Sdl) -> Canvas<sdl2::video::Window> {
         .build()
         .unwrap();
 
-    let canvas = window.into_canvas().build().unwrap();
+    let canvas = window.into_canvas()
+        .present_vsync()
+        .build()
+        .unwrap();
 
     canvas
 }
@@ -53,13 +57,64 @@ fn run_demo(sdl_context: &Sdl) {
     }
 }
 
+fn run_square(sdl_context: &Sdl) {
+    let mut canvas = init_canvas(&sdl_context);
+    let mut event_pump = sdl_context.event_pump().unwrap();
+
+    let mut rect = Rect::new(50, 50, 100, 100);
+
+    'running: loop {
+        canvas.set_draw_color(Color::RGB(0, 0, 255));
+        canvas.clear();
+        
+        canvas.set_draw_color(Color::RGB(255, 0, 0));
+        match canvas.fill_rect(rect) {
+            Ok(_) => {},
+            Err(s) => {
+                eprintln!("There was an error drawing the rectangle: {}", s);
+                return;
+            }
+        };
+        
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit { .. }
+                | Event::KeyDown {
+                    keycode: Some(Keycode::Escape),
+                    ..
+                } => break 'running,
+                Event::KeyDown {
+                    keycode: Some(Keycode::Right),
+                    ..
+                } => {rect.set_x(rect.x + 10)},
+                Event::KeyDown {
+                    keycode: Some(Keycode::Left),
+                    ..
+                } => {rect.set_x(rect.x - 10)},
+                Event::KeyDown {
+                    keycode: Some(Keycode::Up),
+                    ..
+                } => {rect.set_y(rect.y - 10)},
+                Event::KeyDown {
+                    keycode: Some(Keycode::Down),
+                    ..
+                } => {rect.set_y(rect.y + 10)},
+                _ => {}
+            }
+        }
+
+        canvas.present();
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+    }
+}
+
 pub fn main() {
     let args: Vec<String> = env::args().collect();
 
     // we need the ampersand (&) before args to tell the compiler we only want to pass dbg! a temporary reference to args, not "move" the value.
     dbg!(&args);
 
-    let accepted_args = vec!["demo"];
+    let accepted_args = vec!["demo", "square"];
 
     // some funky command-line parsing showing off some basic rust string/vector manipulation features
     if args.len() > 2 {
@@ -93,10 +148,7 @@ pub fn main() {
     let sdl_context = match sdl2::init() {
         Ok(context) => context,
         Err(err) => {
-            println!(
-                "Something went terribly wrong while initializing SDL!: {}",
-                err
-            );
+            println!("Something went terribly wrong while initializing SDL!: {}", err);
             return;
         }
     };
@@ -104,6 +156,7 @@ pub fn main() {
     match (args.len(), if args.len() == 2 { args[1].as_str() } else { "" }) {
         (1, _) => run_demo(&sdl_context),
         (2, "demo") => run_demo(&sdl_context),
+        (2, "square") => run_square(&sdl_context),
         _ => println!("No run mode specified, running demo"),
     }
 }
