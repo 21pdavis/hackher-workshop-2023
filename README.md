@@ -30,9 +30,10 @@ You'll want to run the following commands:
 1. `/bin/bash -c "$(curl -fsSL [https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh))"`
 Follow the installation instructions above, then open a new terminal and run:
 2. `brew install gcc`
+3. `brew install sdl2`
 
 ### Linux/WSL Users:
 You'll want to run the following commands:
 1. `sudo apt update`
 2. `sudo apt install build-essential`
-
+3. `sudo apt-get install libsdl2-dev` (and say 'Y' to all prompts)
