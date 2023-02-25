@@ -50,7 +50,7 @@ fn run_demo(sdl_context: &Sdl) {
                 _ => {}
             }
         }
-        // The rest of the game lnoop goes here...
+        // The rest of the game loop goes here...
 
         canvas.present();
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
@@ -108,13 +108,44 @@ fn run_square(sdl_context: &Sdl) {
     }
 }
 
+#[derive(Debug)]
+#[allow(dead_code)]
+struct Entity {
+    val: i32
+}
+
+fn move_and_return(e: Entity) -> Entity {
+    println!("Thanks for the variable with value '{:?}'. I'll give it back now.", e);
+    return e
+}
+
+#[allow(dead_code)]
+fn move_and_steal(e: Entity) {
+    println!("I've stolen your variable with value '{:?}' and you can't have it back!", e);
+}
+
+#[allow(dead_code)]
+fn borrow(e: &Entity) {
+    println!("I'm just borrowing your variable with value '{:?}', but I never owned it!", e);
+}
+
+fn run_borrow() {
+    let mut e = Entity { val: 5 };
+
+    e = move_and_return(e);
+    // move_and_steal(e);
+    // borrow(&e);
+
+    println!("Printing the Entity:\n{:?}", e);
+}
+
 pub fn main() {
     let args: Vec<String> = env::args().collect();
 
     // we need the ampersand (&) before args to tell the compiler we only want to pass dbg! a temporary reference to args, not "move" the value.
     dbg!(&args);
 
-    let accepted_args = vec!["demo", "square"];
+    let accepted_args = vec!["demo", "square", "borrow"];
 
     // some funky command-line parsing showing off some basic rust string/vector manipulation features
     if args.len() > 2 {
@@ -157,6 +188,7 @@ pub fn main() {
         (1, _) => run_demo(&sdl_context),
         (2, "demo") => run_demo(&sdl_context),
         (2, "square") => run_square(&sdl_context),
+        (2, "borrow") => run_borrow(),
         _ => println!("No run mode specified, running demo"),
     }
 }
