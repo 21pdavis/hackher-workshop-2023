@@ -11,4 +11,4 @@ Cargo.lock
 
 
 # build files copied from build/ at build time during build.rs
-SDL2.dll
+/SDL2.dll
